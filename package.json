@@ -12,11 +12,12 @@
   "dependencies": {
     "dotenv": "^5.0.1",
     "inquirer": "^6.2.0",
+    "ioredis": "^4.16.0",
     "koa": "^2.11.0",
     "koa-bodyparser": "^4.2.1",
     "koa-bouncer": "^6.0.4",
     "koa-router": "^8.0.8",
-    "redis": "^3.0.2",
+    "mongoose": "^5.9.4",
     "superkoa": "^1.0.3",
     "ws": "^7.2.3"
   },

@@ -7,6 +7,7 @@ const bouncer = require("koa-bouncer");
 const router = require("./utils/router");
 const logger = require("./src/middlewares/logger");
 const response = require("./src/middlewares/response");
+const mongo = require("./utils/mongo");
 
 const app = new Koa();
 
