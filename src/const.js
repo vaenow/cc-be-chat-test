@@ -9,9 +9,9 @@ const CHANNEL = {
 
 const MSG_TYPE = {
   NORMAL: 0,
-  LOGIN: 1,
+  SYSTEM: 1,
   STATS: 2,
-  POPULAR: 3
+  POPULAR: 3,
 }
 
 module.exports = { CHANNEL, MSG_TYPE };

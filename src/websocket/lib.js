@@ -24,29 +24,6 @@ const psubscribe = (connCache, chatroomId) => {
   }
 };
 
-// 解析消息
-const parseMessage = (connCache, messageStr) => {
-  const message = JSON.parse(messageStr);
-  // 缓存用户信息
-  if (!connCache.uid) {
-    connCache.uid = message.sendFromUid;
-    connCache.nickname = message.sendFromNickName;
-  }
-
-  const { content = "" } = message;
-  // Forward slash character “/” prefix chat commands
-  // TYPE: POPULAR 热词列表
-  if (content.match(/^\/popular/)) {
-    message.type = MSG_TYPE.POPULAR;
-  }
-  // TYPE: STATS 查询用户在线时长
-  else if (content.match(/^\/stats/)) {
-    message.type = MSG_TYPE.STATS;
-  }
-
-  return message;
-};
-
 // 消息协议
 const makeMsg = ({ connCache, content, sendToUid }) => {
   return JSON.stringify({
@@ -57,8 +34,8 @@ const makeMsg = ({ connCache, content, sendToUid }) => {
   });
 };
 
-// 发送消息
-const sendMessage = ({ connCache, message: { chatroomId, content, type } }) => {
+// 发布消息
+const publishMessage = ({ connCache, message: { chatroomId, content, type } }) => {
   content = msgFilter(content);
 
   // 常规消息
@@ -66,14 +43,13 @@ const sendMessage = ({ connCache, message: { chatroomId, content, type } }) => {
     redisPub.publish(connCache.isSub[CHANNEL.CHAT_ROOM], makeMsg({ connCache, content }));
   }
   // 登录
-  else if (type === MSG_TYPE.LOGIN) {
+  else if (type === MSG_TYPE.SYSTEM) {
     redisPub.publish(connCache.isSub[CHANNEL.ALL], makeMsg({ connCache, content: "user online." }));
   }
 };
 
 module.exports = {
   psubscribe,
-  parseMessage,
   makeMsg,
-  sendMessage,
+  publishMessage,
 };
