@@ -22,7 +22,7 @@ module.exports = wss => {
       // 订阅消息
       psubscribe(connCache, message.chatroomId);
       // 发布消息
-      publishMessage({ connCache, message });
+      await publishMessage({ connCache, message });
       // 保存消息
       await saveMessage(message)
     });

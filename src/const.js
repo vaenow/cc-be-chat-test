@@ -9,7 +9,7 @@ const CHANNEL = {
 
 const MSG_TYPE = {
   NORMAL: 0,
-  SYSTEM: 1,
+  LOGIN: 1,
   STATS: 2,
   POPULAR: 3,
 }

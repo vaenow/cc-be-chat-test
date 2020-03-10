@@ -1,6 +1,7 @@
 const { redis, redisPub } = require("../../utils/redis");
 const { CHANNEL, MSG_TYPE } = require("../const.js");
 const msgFilter = require("./msg-filter");
+const { findLatestMsgByChatroomId } = require("./msg-db");
 
 // 订阅频道
 const psubscribe = (connCache, chatroomId) => {
@@ -35,7 +36,7 @@ const makeMsg = ({ connCache, content, sendToUid }) => {
 };
 
 // 发布消息
-const publishMessage = ({ connCache, message: { chatroomId, content, type } }) => {
+const publishMessage = async ({ connCache, message: { chatroomId, content, type } }) => {
   content = msgFilter(content);
 
   // 常规消息
@@ -43,8 +44,25 @@ const publishMessage = ({ connCache, message: { chatroomId, content, type } }) =
     redisPub.publish(connCache.isSub[CHANNEL.CHAT_ROOM], makeMsg({ connCache, content }));
   }
   // 登录
-  else if (type === MSG_TYPE.SYSTEM) {
-    redisPub.publish(connCache.isSub[CHANNEL.ALL], makeMsg({ connCache, content: "user online." }));
+  else if (type === MSG_TYPE.LOGIN) {
+    // 如果是登录聊天室，就获取最新的消息记录
+    const latestMsgList = await findLatestMsgByChatroomId(chatroomId);
+    const latestMsgStrList = latestMsgList.reverse().map(v => {
+      return makeMsg({
+        connCache: {
+          uid: v.uid,
+          nickname: v.nickName,
+        },
+        content: v.content,
+        sendToUid: v.sendToUid,
+      });
+    });
+    for (let i = 0; i < latestMsgStrList.length; i++) {
+      redisPub.publish(connCache.isSub[CHANNEL.USER], latestMsgStrList[i]);
+    }
+
+    // 登录通知其他用户
+    redisPub.publish(connCache.isSub[CHANNEL.ALL], makeMsg({ connCache, content }));
   }
 };
 
