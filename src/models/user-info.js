@@ -2,12 +2,19 @@ const mongoose = require("mongoose");
 const commonField = require("../../utils/common_field");
 
 const Schema = new mongoose.Schema({
-  uid: {  // 用户ID
+  // 用户ID
+  uid: {
     type: String,
     required: true,
   },
   nickName: String, // 昵称
   password: String, // 密码
+  // 登录时间
+  loginAt: {
+    type: Number,
+    default: Date.now,
+  },
+  logoutAt: Number, // 登出时间
   // ...MORE
 });
 

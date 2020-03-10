@@ -8,11 +8,10 @@ module.exports = class UserService {
   // DEMO: 根据 nickname 查找用户信息
   static async findUidByNickName(nickName) {
     let userInfo = await UserInfoModel.findOne({ nickName });
-    console.log('userInfo', userInfo)
-    
+
     // 没有用户 nickname 就创建一个用户
     if (!userInfo) {
-      userInfo = await this.createUserInfoByNickName(nickName);
+      userInfo = await UserService.createUserInfoByNickName(nickName);
     }
 
     return userInfo;
@@ -27,5 +26,15 @@ module.exports = class UserService {
     });
     console.log(userInfo);
     return userInfo;
+  }
+
+  // 更新用户登录时间
+  static async updateUserLoginTimestamp(nickName) {
+    const ret = await UserInfoModel.updateOne({ nickName: String(nickName) }, { $set: { loginAt: Date.now() } });
+  }
+
+  // 更新用户登出时间
+  static async updateUserLogoutTimestamp(nickName) {
+    await UserInfoModel.updateOne({ nickName }, { $set: { logoutAt: Date.now() } });
   }
 };
