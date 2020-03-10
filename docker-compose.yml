@@ -1,0 +1,27 @@
+version: '2'
+services:
+  cc-chat-api:
+    image: registry.cn-hangzhou.aliyuncs.com/tik/cc-cc-chat-api:stable
+    environment:
+      APP_ID: 3033
+      API_PORT: 3001
+      NODE_ENV: development
+      MONGO_HOST: mongo
+      MONGO_PORT: 2717
+      MONGO_DBNAME: cc_chat
+      MONGO_USER: ""
+      MONGO_PASSWORD: ""
+      REDIS_HOST: redis
+      REDIS_PORT: 16379
+      REDIS_DB: 1
+
+    stdin_open: true
+    external_links:
+    - 000DB/mongo:mongo
+    - 000DB/redis:redis
+
+
+    volumes:
+    - /tmp:/tmp
+    tty: true
+  

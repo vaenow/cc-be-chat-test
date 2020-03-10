@@ -1,0 +1,87 @@
+stages:
+  - test
+  - build
+  - deploy
+  - report
+
+job_test:
+  stage: test
+  image: registry.cn-hangzhou.aliyuncs.com/tik/node:tik
+  cache:
+    untracked: true
+    key: ${CI_COMMIT_REF_SLUG}
+    policy: push
+  only:
+    - master
+  script: 
+    - cp .env.example .env
+    - tik docker
+    - rm -fr node_modules
+  variables:
+    APP_ID: 3033
+    API_PORT: 3001
+    NODE_ENV: development
+    MONGO_HOST: 121.40.81.49
+    MONGO_PORT: 2717
+    MONGO_DBNAME: cc_chat
+    MONGO_USER: ""
+    MONGO_PASSWORD: ""
+    REDIS_HOST: 121.40.81.49
+    REDIS_PORT: 16379
+    REDIS_DB: 1
+
+
+job_build_stable:
+  stage: build
+  image: gitlab/dind
+  cache:
+    untracked: true
+    key: ${CI_COMMIT_REF_SLUG}
+    policy: pull
+  only:
+    - master
+  script:
+    - docker build -t cc-chat-api:stable .
+    - docker login --username=${SEC_USERNAME} registry.cn-hangzhou.aliyuncs.com -p ${SEC_PASSWORD}
+    - docker tag cc-chat-api:stable registry.cn-hangzhou.aliyuncs.com/tik/cc-cc-chat-api:stable
+    - docker push registry.cn-hangzhou.aliyuncs.com/tik/cc-cc-chat-api:stable
+  
+job_build_release:
+  stage: build
+  image: gitlab/dind
+  cache:
+    untracked: true
+    key: ${CI_COMMIT_REF_SLUG}
+    policy: pull
+  only:
+    - /^release.*$/
+  script:
+    - rm -f .env
+    - docker build -t cc-chat-api:1.1.0 .
+    - docker login --username=${SEC_USERNAME} registry.cn-hangzhou.aliyuncs.com -p ${SEC_PASSWORD}
+    - docker tag cc-chat-api:1.1.0 registry.cn-hangzhou.aliyuncs.com/tik/cc-cc-chat-api:1.1.0
+    - docker push registry.cn-hangzhou.aliyuncs.com/tik/cc-cc-chat-api:1.1.0
+
+job_deploy:
+  stage: deploy
+  image: registry.cn-hangzhou.aliyuncs.com/dev_tool/rancher-cli
+  cache:
+    untracked: true
+    key: ${CI_COMMIT_REF_SLUG}
+    policy: pull
+  only:
+    - master
+  script:
+    - rm -f ~/.rancher/cli.json
+    - rancher --url ${RANCHER_HOST}/v2-beta --access-key ${RANCHER_DEPLOY_AK} --secret-key ${RANCHER_DEPLOY_SK} --env Default up -d  --pull --force-upgrade --confirm-upgrade --stack cc-cc-chat-api
+
+job_report:
+  stage: report
+  image: registry.cn-hangzhou.aliyuncs.com/tik/node:tik
+  cache:
+    untracked: true
+    key: ${CI_COMMIT_REF_SLUG}
+    policy: pull-push
+  when: on_failure
+  script:
+    - curl https://oapi.dingtalk.com/robot/send?access_token=4b6c67515042a6f16ff5799eedf77231ccb785cd1842c28c73c2dd8499113d2f -XPOST -H 'content-type:application/json' -d '{"msgtype":"text","text":{"content":"[cc-cc-chat-api] Job Failed. Link:cc/cc-chat-api/pipelines"}}'
