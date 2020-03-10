@@ -29,8 +29,8 @@ module.exports = wss => {
     redis.on("message", (channel, messageStr) => {
       console.log('redis.on("message"', messageStr);
 
-      const { sendFromNickName, message } = parseMessage(connCache, messageStr);
-      ws.send(`[${channel}]@${sendFromNickName}: ${message}`);
+      const { sendFromNickName, content } = parseMessage(connCache, messageStr);
+      ws.send(`[${channel}]@${sendFromNickName}: ${content}`);
     });
 
     // 连接成功

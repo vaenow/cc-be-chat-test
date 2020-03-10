@@ -1,6 +1,6 @@
 const { redis, redisPub } = require("../../utils/redis");
 const { CHANNEL, MSG_TYPE } = require("../const.js");
-// const filterMsg = require('./filter-msg')
+const msgFilter = require("./msg-filter");
 
 // 订阅频道
 const psubscribe = (connCache, chatroomId) => {
@@ -33,23 +33,24 @@ const parseMessage = (connCache, messageStr) => {
     connCache.nickname = message.sendFromNickName;
   }
 
+  const { content = "" } = message;
   // Forward slash character “/” prefix chat commands
   // TYPE: POPULAR 热词列表
-  if (message.match(/^\/popular/)) {
-    message.type = MSG_TYPE.POPULAR
+  if (content.match(/^\/popular/)) {
+    message.type = MSG_TYPE.POPULAR;
   }
   // TYPE: STATS 查询用户在线时长
-  else if (message.match(/^\/stats/)) {
-    message.type = MSG_TYPE.STATS
+  else if (content.match(/^\/stats/)) {
+    message.type = MSG_TYPE.STATS;
   }
 
   return message;
 };
 
 // 消息协议
-const makeMsg = ({ connCache, message, sendToUid }) => {
+const makeMsg = ({ connCache, content, sendToUid }) => {
   return JSON.stringify({
-    message,
+    content,
     sendToUid,
     sendFromUid: connCache.uid,
     sendFromNickName: connCache.nickname,
@@ -57,15 +58,16 @@ const makeMsg = ({ connCache, message, sendToUid }) => {
 };
 
 // 发送消息
-const sendMessage = ({ connCache, message: { chatroomId, message, type } }) => {
-  console.log("type", type === MSG_TYPE.NORMAL, type === MSG_TYPE.LOGIN, type, message);
+const sendMessage = ({ connCache, message: { chatroomId, content, type } }) => {
+  content = msgFilter(content);
+
   // 常规消息
   if (type === MSG_TYPE.NORMAL) {
-    redisPub.publish(connCache.isSub[CHANNEL.CHAT_ROOM], makeMsg({ connCache, message }));
+    redisPub.publish(connCache.isSub[CHANNEL.CHAT_ROOM], makeMsg({ connCache, content }));
   }
   // 登录
   else if (type === MSG_TYPE.LOGIN) {
-    redisPub.publish(connCache.isSub[CHANNEL.ALL], makeMsg({ connCache, message: "user online." }));
+    redisPub.publish(connCache.isSub[CHANNEL.ALL], makeMsg({ connCache, content: "user online." }));
   }
 };
 
@@ -74,4 +76,4 @@ module.exports = {
   parseMessage,
   makeMsg,
   sendMessage,
-}
+};

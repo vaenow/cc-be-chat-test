@@ -15,15 +15,13 @@ function loadProfanityInMem() {
 }
 
 // 消息内容过滤，添加*
-const msgFilter = messageContent => {
+const msgFilter = (messageContent = "") => {
   for (let i = 0; i < PROFANITY_WORLDS.length; i++) {
     const wordReg = new RegExp("(\\s|^)" + PROFANITY_WORLDS[i]);
     messageContent = messageContent.replace(wordReg, matched => {
-      // const i = matched.match(/^\s/) ? 1 : 0;
-      // return " ".repeat(i) + "*".repeat(matched.length - 1 * i);
       // E.g. “hellboy” -> “****boy”
       // " tittie fucker" -> " ****** ******"
-      return matched.replace(/[^\s]/g, "*")
+      return matched.replace(/[^\s]/g, "*");
     });
   }
   return messageContent;
