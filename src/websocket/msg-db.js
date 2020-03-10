@@ -1,12 +1,13 @@
 const ChatMsgModel = require("../models/chat-msg");
 const { MSG_TYPE } = require("../const");
+const msgFilter = require("./msg-filter");
 
 // 保存消息到 DB
 const saveMessage = async message => {
   const ret = await ChatMsgModel.create({
     username: message.username,
     reciever: message.reciever,
-    content: message.content,
+    content: msgFilter(message.content),
     type: message.type,
     chatroom: message.chatroom,
   });
@@ -25,7 +26,13 @@ const findLatestMsgByChatroom = async (chatroom, msgLimit = 50) => {
   return msgList;
 };
 
+// 查询最近消息
+const findLastMsgList = async () => {
+  return await ChatMsgModel.find({ createdAt: { $gte: (process.env.LAST_SECONDS || 5) * 1e3 }, type: MSG_TYPE.CHAT });
+};
+
 module.exports = {
   saveMessage,
   findLatestMsgByChatroom,
+  findLastMsgList,
 };

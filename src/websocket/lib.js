@@ -4,6 +4,7 @@ const msgFilter = require("./msg-filter");
 const { findLatestMsgByChatroom } = require("./msg-db");
 const UserSevice = require("../services/user-service");
 const { parseUserLoginTime } = require("./msg-stats");
+const { findHotWords } = require("./msg-popular");
 
 // 订阅频道
 const psubscribe = ({ type, username, chatroom }, ws) => {
@@ -84,6 +85,14 @@ const publishMessage = async message => {
     // redisPub.publish(`${CHANNEL.CHAT_ROOM}-${chatroomId}`, makeMsg({ connCache, content }));
     const msg = createMsg({ type, username, content });
     redisPub.publish(`${CHANNEL.CHAT_ROOM}-${chatroom}`, msg);
+  }
+
+  // 统计热词
+  // 如有中文，还可加上相应分词手段。
+  else if (type === MSG_TYPE.POPULAR) {
+    const theMostPopularWord = await findHotWords();
+    const msg = createMsg({ type: MSG_TYPE.CHAT, username, content: theMostPopularWord });
+    redisPub.publish(`${CHANNEL.USER}-${username}`, msg);
   }
 
   // 统计在线时长 /stats
