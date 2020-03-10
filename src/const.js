@@ -7,4 +7,11 @@ const CHANNEL = {
   USER: "CHANNEL_USER",
 };
 
-module.exports = { CHANNEL };
+const MSG_TYPE = {
+  NORMAL: 0,
+  LOGIN: 1,
+  STATS: 2,
+  POPULAR: 3
+}
+
+module.exports = { CHANNEL, MSG_TYPE };

@@ -1,24 +1,27 @@
 // ws
 
 const { redis, redisPub } = require("../../utils/redis");
-const { CHANNEL } = require("../const.js");
+const { CHANNEL, MSG_TYPE } = require("../const.js");
 
 // 订阅频道
 const psubscribe = (connCache, chatroomId) => {
   // 订阅频道: 全部
   if (!connCache.isSub[CHANNEL.ALL]) {
-    redis.subscribe(CHANNEL.ALL);
-    connCache.isSub[CHANNEL.ALL] = true;
+    let key = CHANNEL.ALL;
+    redis.subscribe(key);
+    connCache.isSub[CHANNEL.ALL] = key;
   }
   // 订阅频道: 仅聊天室
   if (!connCache.isSub[CHANNEL.CHAT_ROOM]) {
-    redis.subscribe(`${CHANNEL.CHAT_ROOM}-${chatroomId}`);
-    connCache.isSub[CHANNEL.CHAT_ROOM] = true;
+    let key = `${CHANNEL.CHAT_ROOM}-${chatroomId}`;
+    redis.subscribe(key);
+    connCache.isSub[CHANNEL.CHAT_ROOM] = key;
   }
   // 订阅频道: 个人
   if (!connCache.isSub[CHANNEL.USER]) {
-    redis.subscribe(`${CHANNEL.USER}-${connCache.uid}`);
-    connCache.isSub[CHANNEL.USER] = true;
+    let key = `${CHANNEL.USER}-${connCache.uid}`;
+    redis.subscribe(key);
+    connCache.isSub[CHANNEL.USER] = key;
   }
 };
 
@@ -42,6 +45,18 @@ const makeMsg = ({ connCache, message, sendToUid }) => {
   });
 };
 
+const sendMessage = ({ connCache, message: { chatroomId, message, type } }) => {
+  console.log("type", type === MSG_TYPE.NORMAL, type === MSG_TYPE.LOGIN, type, message);
+  // 常规消息
+  if (type === MSG_TYPE.NORMAL) {
+    redisPub.publish(connCache.isSub[CHANNEL.CHAT_ROOM], makeMsg({ connCache, message }));
+  }
+  // 登录
+  else if (type === MSG_TYPE.LOGIN) {
+    redisPub.publish(connCache.isSub[CHANNEL.ALL], makeMsg({ connCache, message: "user online." }));
+  }
+};
+
 module.exports = wss => {
   // timeout to expire
   wss.on("connection", ws => {
@@ -51,16 +66,22 @@ module.exports = wss => {
       nickname: null,
     };
 
+    // 消息：websocket
     ws.on("message", async messageStr => {
       const message = parseMessage(connCache, messageStr);
       psubscribe(connCache, message.chatroomId);
 
       console.log("received: %s", messageStr);
-      console.log("connCache: %s", JSON.stringify(connCache))
-      redisPub.publish(CHANNEL.ALL, makeMsg({ connCache, message: "user online." }));
+      console.log("connCache: %s", JSON.stringify(connCache));
+
+      // 发布消息
+      sendMessage({ connCache, message });
     });
 
+    // 消息：redis
     redis.on("message", (channel, messageStr) => {
+      console.log('redis.on("message"', messageStr);
+
       const { sendFromNickName, message } = parseMessage(connCache, messageStr);
       ws.send(`[${channel}]@${sendFromNickName}: ${message}`);
     });
