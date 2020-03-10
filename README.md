@@ -1,7 +1,9 @@
 
 ## Try it
 
-run `node start` in terminal to run the chat server
+1. run `cp .env.example .env`
+
+2. run `node start` in terminal to run the chat server
 
 
 ## screenshot
