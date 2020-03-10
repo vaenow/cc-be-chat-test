@@ -9,9 +9,13 @@ const CHANNEL = {
 
 const MSG_TYPE = {
   NORMAL: 0,
-  LOGIN: 1,
+  LOGIN: "LOGIN",
   STATS: 2,
   POPULAR: 3,
-}
+
+  LIST: "LIST",
+  CONNECTED: "CONNECTED",
+  CHAT: "CHAT",
+};
 
 module.exports = { CHANNEL, MSG_TYPE };

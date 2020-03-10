@@ -7,7 +7,7 @@ const Schema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  nickName: String, // 昵称
+  username: String, // 昵称
   password: String, // 密码
   // 登录时间
   loginAt: {

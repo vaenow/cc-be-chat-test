@@ -9,7 +9,7 @@ const saveMessage = async message => {
     reciever: message.sendToUid,
     content: message.content,
     type: message.type,
-    chatroomId: message.chatroomId,
+    chatroom: message.chatroom,
   });
 
   // 如保存失败，TODO
@@ -19,8 +19,8 @@ const saveMessage = async message => {
 };
 
 // 查询同一聊天室最新的消息
-const findLatestMsgByChatroomId = async (chatroomId, msgLimit = 50) => {
-  const msgList = await ChatMsgModel.find({ chatroomId, type: MSG_TYPE.NORMAL })
+const findLatestMsgByChatroom = async (chatroom, msgLimit = 50) => {
+  const msgList = await ChatMsgModel.find({ chatroom, type: MSG_TYPE.CHAT })
     .sort({ createdAt: -1 })
     .limit(msgLimit);
   return msgList;
@@ -28,5 +28,5 @@ const findLatestMsgByChatroomId = async (chatroomId, msgLimit = 50) => {
 
 module.exports = {
   saveMessage,
-  findLatestMsgByChatroomId,
+  findLatestMsgByChatroom,
 };

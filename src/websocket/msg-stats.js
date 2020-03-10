@@ -6,6 +6,10 @@ const { findUidByNickName } = require("../services/user-service");
 // 解析用户登入时间
 const parseUserLoginTime = async nickName => {
   const userInfo = await findUidByNickName(nickName);
+  if (!userInfo) {
+    return `查无此用户 ${nickName}`
+  }
+
   let { loginAt = Date.now(), logoutAt = Date.now() } = userInfo;
 
   // 如果还未刷新登出时间，就取当前时间。
