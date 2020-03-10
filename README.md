@@ -1,1 +1,4 @@
-run `node index.js` in terminal to run the chat client
+
+## Start
+
+run `node start` in terminal to run the chat client
