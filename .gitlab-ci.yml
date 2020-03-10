@@ -15,7 +15,6 @@ job_test:
     - master
   script: 
     - cp .env.example .env
-    - tik docker
     - rm -fr node_modules
   variables:
     APP_ID: 3033
