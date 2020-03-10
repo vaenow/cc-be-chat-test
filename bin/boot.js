@@ -1,7 +1,7 @@
 const { EOL } = require('os');
 const conf = require('dotenv').load();
 const WebSocket = require("ws");
-const WebSocketApi = require("../utils/ws");
+const WebSocketApi = require("../src/websocket/ws");
 
 if (conf.parsed && conf.parsed.APP_ID === '') {
   throw new Error(' APP_ID not configured!');
