@@ -3,37 +3,28 @@ const { MSG_TYPE } = require("../const");
 const UserSevice = require("../services/user-service");
 
 // 解析消息
-const parseMessage = async (messageStr) => {
-  const message = JSON.parse(messageStr);
-
-  if (message.type === MSG_TYPE.LOGIN) {
-    
+const parseMessage = async messageStr => {
+  let message;
+  try {
+    message = JSON.parse(messageStr);
+  } catch (e) {
+    console.log(`ERR: invalid message format.`);
+    return;
   }
 
+  const { content = "" } = message;
+  // Forward slash character “/” prefix chat commands
+  // TYPE: POPULAR 热词列表
+  if (content.match(/^\/popular/)) {
+    message.type = MSG_TYPE.POPULAR;
+  }
 
-  // if (!connCache.uid) {
-  //   // UserSevice 查询用户 uid
-  //   const userInfo = await UserSevice.findUidByNickName(message.sendFromNickName);
-  //   // 没有用户nickname 就创建一个用户
-  //   if (!userInfo) {
-  //     userInfo = await UserService.createUserInfoByNickName(message.sendFromNickName);
-  //   }
-  //   message.sendFromUid = userInfo.uid;
-  //   // 缓存用户信息
-  //   connCache.uid = message.sendFromUid;
-  //   connCache.nickname = message.sendFromNickName;
-  // }
+  // TYPE: STATS 查询用户在线时长
+  else if (content.match(/^\/stats/)) {
+    message.type = MSG_TYPE.STATS;
+    // message.content = content.replace(/^\/stats/, "").trim();
+  }
 
-  // const { content = "" } = message;
-  // // Forward slash character “/” prefix chat commands
-  // // TYPE: POPULAR 热词列表
-  // if (content.match(/^\/popular/)) {
-  //   message.type = MSG_TYPE.POPULAR;
-  // }
-  // // TYPE: STATS 查询用户在线时长
-  // else if (content.match(/^\/stats/)) {
-  //   message.type = MSG_TYPE.STATS;
-  // }
 
   return message;
 };

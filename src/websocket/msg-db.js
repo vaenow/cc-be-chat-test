@@ -4,9 +4,8 @@ const { MSG_TYPE } = require("../const");
 // 保存消息到 DB
 const saveMessage = async message => {
   const ret = await ChatMsgModel.create({
-    sender: message.sendFromUid,
-    nickName: message.sendFromNickName,
-    reciever: message.sendToUid,
+    username: message.username,
+    reciever: message.reciever,
     content: message.content,
     type: message.type,
     chatroom: message.chatroom,

@@ -1,13 +1,13 @@
 // 统计用户在线时长
 const moment = require("moment");
 const momentDurationFormat = require("moment-duration-format");
-const { findUidByNickName } = require("../services/user-service");
+const { findUserInfoByUserName } = require("../services/user-service");
 
 // 解析用户登入时间
-const parseUserLoginTime = async nickName => {
-  const userInfo = await findUidByNickName(nickName);
+const parseUserLoginTime = async username => {
+  const userInfo = await findUserInfoByUserName(username);
   if (!userInfo) {
-    return `查无此用户 ${nickName}`
+    return `查无此用户 ${username}`
   }
 
   let { loginAt = Date.now(), logoutAt = Date.now() } = userInfo;
