@@ -5,8 +5,12 @@
 
 2. run `node start` in terminal to run the chat server
 
+## DEMO
 
-## screenshot
+[https://vaenow.github.io/cc-chat-web/index.html](https://vaenow.github.io/cc-chat-web/index.html)
+
+
+## Screenshot
 
 [vaenow/cc-chat-web](https://github.com/vaenow/cc-chat-web)
 
